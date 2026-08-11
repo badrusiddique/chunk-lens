@@ -22,7 +22,7 @@ and colours runs of it, rather than printing a list of chunks. That only works i
 located in the source. It also means:
 
 - overlap is a genuine interval intersection, so it can be rendered once rather than duplicated
-- whitespace trimmed by a strategy becomes a *measurable gap*, not unexplained text jumping
+- whitespace trimmed by a strategy becomes a _measurable gap_, not unexplained text jumping
 - `coverage` is computable, which is how we replace ChunkViz's misleading `Total Characters`
 
 The one strategy that needs synthesized text (Markdown header, which prepends a heading breadcrumb)
@@ -68,24 +68,24 @@ export type SizeUnit = 'characters' | 'tokens';
 
 /** One chunk. `start`/`end` are indices into the source string; `end` is exclusive. */
 export interface Chunk {
-  readonly index: number;        // 0-based, stable ordering
-  readonly start: number;        // inclusive index into source
-  readonly end: number;          // exclusive index into source
-  readonly size: number;         // measured length in the active unit
+  readonly index: number; // 0-based, stable ordering
+  readonly start: number; // inclusive index into source
+  readonly end: number; // exclusive index into source
+  readonly size: number; // measured length in the active unit
   /** Text synthesized by the strategy and absent from the source at this position. */
-  readonly prefix?: string;      // Markdown header breadcrumb only
+  readonly prefix?: string; // Markdown header breadcrumb only
 }
 
 export type WarningCode =
   | 'empty-input'
   | 'overlap-clamped'
-  | 'oversize-chunk'        // an indivisible atom exceeds chunkSize
-  | 'whitespace-trimmed'    // strategy dropped source text; coverage < 1
-  | 'no-separator-match';   // ladder exhausted, fell through to character splitting
+  | 'oversize-chunk' // an indivisible atom exceeds chunkSize
+  | 'whitespace-trimmed' // strategy dropped source text; coverage < 1
+  | 'no-separator-match'; // ladder exhausted, fell through to character splitting
 
 export interface SplitWarning {
   readonly code: WarningCode;
-  readonly message: string;              // written for a developer, states the consequence
+  readonly message: string; // written for a developer, states the consequence
   readonly chunkIndices?: readonly number[];
 }
 
@@ -105,11 +105,7 @@ export interface SplitResult {
   readonly config: ResolvedConfig;
 }
 
-export type Splitter = (
-  source: string,
-  config: ResolvedConfig,
-  measure: Measure,
-) => SplitResult;
+export type Splitter = (source: string, config: ResolvedConfig, measure: Measure) => SplitResult;
 ```
 
 ### Registry
@@ -119,11 +115,11 @@ export type Splitter = (
 ```ts
 export interface SplitterMeta {
   readonly id: SplitterId;
-  readonly name: string;          // "Recursive (Markdown-aware)" — ours, not LangChain's label
-  readonly summary: string;       // one line, shown in the select and the glossary
+  readonly name: string; // "Recursive (Markdown-aware)" — ours, not LangChain's label
+  readonly summary: string; // one line, shown in the select and the glossary
   readonly equivalents: { readonly langchain?: string; readonly llamaIndex?: string };
   readonly supports: {
-    readonly overlap: boolean;    // true for all 8; the field exists for future strategies
+    readonly overlap: boolean; // true for all 8; the field exists for future strategies
     readonly units: readonly SizeUnit[];
   };
   readonly suggestedSample: SampleId;
@@ -145,7 +141,7 @@ export interface RenderRun {
   readonly start: number;
   readonly end: number;
   readonly kind: RunKind;
-  readonly chunkIndices: readonly number[];  // 1 for 'chunk', 2+ for 'overlap', 0 for 'gap'
+  readonly chunkIndices: readonly number[]; // 1 for 'chunk', 2+ for 'overlap', 0 for 'gap'
 }
 
 export function toRenderRuns(source: string, chunks: readonly Chunk[]): readonly RenderRun[];
@@ -164,19 +160,22 @@ becomes a number instead of a mystery.
 
 ```ts
 export interface SizeSummary {
-  readonly min: number; readonly median: number; readonly mean: number;
-  readonly p95: number; readonly max: number;
+  readonly min: number;
+  readonly median: number;
+  readonly mean: number;
+  readonly p95: number;
+  readonly max: number;
 }
 
 export interface ChunkStats {
   readonly count: number;
-  readonly inputCharacters: number;      // source.length
-  readonly emittedCharacters: number;    // sum of chunk lengths, duplication included
-  readonly uniqueCharacters: number;     // source characters covered by >= 1 chunk
+  readonly inputCharacters: number; // source.length
+  readonly emittedCharacters: number; // sum of chunk lengths, duplication included
+  readonly uniqueCharacters: number; // source characters covered by >= 1 chunk
   readonly duplicatedCharacters: number; // emitted - unique
-  readonly coverage: number;             // unique / input, 0..1
-  readonly duplication: number;          // duplicated / emitted, 0..1
-  readonly size: SizeSummary;            // in the active unit
+  readonly coverage: number; // unique / input, 0..1
+  readonly duplication: number; // duplicated / emitted, 0..1
+  readonly size: SizeSummary; // in the active unit
   readonly histogram: readonly HistogramBin[];
 }
 ```
@@ -184,15 +183,15 @@ export interface ChunkStats {
 Worked against the exact case ChunkViz reports incorrectly. Fixed window, 2,658-char source, size 200,
 overlap 50, so stride 150:
 
-| Figure | Value | Derivation |
-|---|---|---|
-| chunks | 18 | `ceil((2658 - 200) / 150) + 1` |
-| inputCharacters | 2,658 | source length |
-| emittedCharacters | 3,508 | `17 x 200 + 108` |
-| uniqueCharacters | 2,658 | fixed window trims nothing |
-| duplicatedCharacters | 850 | 3,508 - 2,658 |
-| coverage | 1.00 | 2,658 / 2,658 |
-| duplication | 0.2423 | 850 / 3,508 |
+| Figure               | Value  | Derivation                     |
+| -------------------- | ------ | ------------------------------ |
+| chunks               | 18     | `ceil((2658 - 200) / 150) + 1` |
+| inputCharacters      | 2,658  | source length                  |
+| emittedCharacters    | 3,508  | `17 x 200 + 108`               |
+| uniqueCharacters     | 2,658  | fixed window trims nothing     |
+| duplicatedCharacters | 850    | 3,508 - 2,658                  |
+| coverage             | 1.00   | 2,658 / 2,658                  |
+| duplication          | 0.2423 | 850 / 3,508                    |
 
 ChunkViz reports this as `Total Characters: 3508` and nothing else, which reads as "your document is
 3,508 characters long". It is 2,658. Both numbers are useful and they are different things, so we
@@ -231,12 +230,12 @@ is emitted whole and raises `oversize-chunk`.
 
 Ladders (`separators.ts`):
 
-| Strategy | Ladder |
-|---|---|
-| `recursive-text` | `\n\n`, `\n`, ` `, `''` |
+| Strategy               | Ladder                                                                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `recursive-text`       | `\n\n`, `\n`, ` `, `''`                                                                                                                   |
 | `recursive-javascript` | `\nclass `, `\nfunction `, `\nconst `, `\nlet `, `\nvar `, `\nif `, `\nfor `, `\nwhile `, `\nswitch `, `\ncase `, `\n\n`, `\n`, ` `, `''` |
-| `recursive-python` | `\nclass `, `\ndef `, `\n\tdef `, `\n\n`, `\n`, ` `, `''` |
-| `recursive-markdown` | `\n## `, `\n### `, `\n#### `, `\n##### `, `\n###### `, ` ```\n `, `\n---\n`, `\n___\n`, `\n\n`, `\n`, ` `, `''` |
+| `recursive-python`     | `\nclass `, `\ndef `, `\n\tdef `, `\n\n`, `\n`, ` `, `''`                                                                                 |
+| `recursive-markdown`   | `\n## `, `\n### `, `\n#### `, `\n##### `, `\n###### `, ` ```\n `, `\n---\n`, `\n___\n`, `\n\n`, `\n`, ` `, `''`                           |
 
 **Overlap is enabled on all four.** ChunkViz disables it, which is an implementation limitation rather
 than a property of the algorithm.
@@ -265,22 +264,22 @@ offsets. In Phase 1 it is tested with a deterministic fake measure; Phase 2 supp
 
 ## 7. Component contracts
 
-| Component | Responsibility | Key props |
-|---|---|---|
-| `AppShell` | Three-region workbench grid, skip link, landmarks | `children` |
-| `SourcePane` | Textarea, autosave, character counter, size guard | `value`, `onChange`, `maxBytes` |
-| `FileDrop` | `.txt` picker plus drop zone, rejects non-text, announces result | `onLoad(text, filename)` |
-| `SampleChip` | Offers a matching sample when strategy and content disagree. **Never auto-applies.** | `suggested`, `onApply`, `onDismiss` |
-| `StrategySelect` | Registry-driven, groups recursive variants, shows the one-line summary | `value`, `onChange` |
-| `NumberSlider` | Coupled number + range, shared label, clamps, presets | `label`, `value`, `min`, `max`, `presets`, `onChange` |
-| `ParamPanel` | Composes the controls from the strategy's param schema | `config`, `meta`, `onChange` |
-| `ChunkCanvas` | Renders source once, paints runs, roving tabindex, budget notice | `source`, `runs`, `budget`, `onSelect` |
-| `ChunkRun` | One run: wash + accent for `chunk`, wash + hatch for `overlap`, bare for `gap` | `run`, `text`, `selected` |
-| `Legend` | Live examples of chunk, overlap and gap treatments | `-` |
-| `RenderBudgetNotice` | States the exact rendered range and offers navigation | `shown`, `total`, `onJump` |
-| `ChunkTable` | Accessible non-visual equivalent: index, range, size, preview | `chunks`, `source` |
-| `StatTiles` | The four labelled figures plus count and mean | `stats` |
-| `WarningChips` | One chip per `SplitWarning`, with its consequence spelled out | `warnings` |
+| Component            | Responsibility                                                                       | Key props                                             |
+| -------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| `AppShell`           | Three-region workbench grid, skip link, landmarks                                    | `children`                                            |
+| `SourcePane`         | Textarea, autosave, character counter, size guard                                    | `value`, `onChange`, `maxBytes`                       |
+| `FileDrop`           | `.txt` picker plus drop zone, rejects non-text, announces result                     | `onLoad(text, filename)`                              |
+| `SampleChip`         | Offers a matching sample when strategy and content disagree. **Never auto-applies.** | `suggested`, `onApply`, `onDismiss`                   |
+| `StrategySelect`     | Registry-driven, groups recursive variants, shows the one-line summary               | `value`, `onChange`                                   |
+| `NumberSlider`       | Coupled number + range, shared label, clamps, presets                                | `label`, `value`, `min`, `max`, `presets`, `onChange` |
+| `ParamPanel`         | Composes the controls from the strategy's param schema                               | `config`, `meta`, `onChange`                          |
+| `ChunkCanvas`        | Renders source once, paints runs, roving tabindex, budget notice                     | `source`, `runs`, `budget`, `onSelect`                |
+| `ChunkRun`           | One run: wash + accent for `chunk`, wash + hatch for `overlap`, bare for `gap`       | `run`, `text`, `selected`                             |
+| `Legend`             | Live examples of chunk, overlap and gap treatments                                   | `-`                                                   |
+| `RenderBudgetNotice` | States the exact rendered range and offers navigation                                | `shown`, `total`, `onJump`                            |
+| `ChunkTable`         | Accessible non-visual equivalent: index, range, size, preview                        | `chunks`, `source`                                    |
+| `StatTiles`          | The four labelled figures plus count and mean                                        | `stats`                                               |
+| `WarningChips`       | One chip per `SplitWarning`, with its consequence spelled out                        | `warnings`                                            |
 
 `ChunkCanvas` accessibility: the canvas is a `role="group"` with a screen-reader summary. Runs carry
 `data-chunk-index` and participate in a roving tabindex, so arrow keys move between chunks, Enter
@@ -292,12 +291,14 @@ on sighted scanning.
 Every criterion below becomes a named test. Nothing merges without its criteria green.
 
 **`chore/scaffold`**
+
 - `pnpm verify` passes on the empty app: typecheck, lint at zero warnings, tests, build, prerender
 - CI runs on push and PR on Node 22 and is required for merge
 - Light and dark tokens defined; the palette validator runs in CI against our real surfaces
 - An error boundary catches a thrown render and shows a recovery affordance, proven by a test
 
 **`feat/source-input`**
+
 - Typing persists across reload
 - Upload and drag-drop both load a `.txt`; a non-text file is rejected with a readable message
 - A file over the guard is refused without freezing the tab
@@ -305,18 +306,21 @@ Every criterion below becomes a named test. Nothing merges without its criteria 
 - Zero axe critical or serious violations; the textarea has a real associated `<label>`
 
 **`feat/splitters`**
+
 - All 8 strategies produce chunks satisfying every invariant in section 9
 - Golden files pin each strategy's output on each sample document
 - 90% statements and branches on `src/lib/splitters`
 - 1 MB source splits in under 250ms for every strategy, asserted in the test
 
 **`feat/strategy-and-params`**
+
 - Changing strategy **preserves the text**; the sample chip is offered and never auto-applies
 - Number and slider stay in sync in both directions
 - Overlap clamps at 90% of chunk size; above 50% a warning states the duplication cost
 - Presets set exact values; every control is reachable and operable by keyboard alone
 
 **`feat/chunk-canvas`**
+
 - The source renders once; concatenating all run texts reproduces the source exactly
 - Overlap runs appear once, carry the hatch, and list 2+ chunk indices
 - Gap runs are visible and counted
@@ -325,6 +329,7 @@ Every criterion below becomes a named test. Nothing merges without its criteria 
 - Arrow keys traverse every run, focus is visible, Enter selects, `ChunkTable` lists every chunk
 
 **`feat/basic-stats`**
+
 - The section 5 table reproduces exactly for the 2,658 / 200 / 50 case
 - `coverage < 1` exactly when a strategy trimmed, and the warning chip appears
 - Figures are labelled so `input` and `emitted` can never be confused

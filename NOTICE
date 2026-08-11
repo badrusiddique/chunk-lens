@@ -1,0 +1,28 @@
+chunk-lens — Prior Art and Attribution
+=======================================
+
+This project is an independent implementation. No source code was copied from
+any other project. The following prior art informed what features to build and
+which defects to fix.
+
+ChunkViz v0.1
+  Author:  Greg Kamradt
+  URL:     https://chunkviz.up.railway.app
+  Source:  https://github.com/gkamradt/ChunkViz
+  License: MIT
+  Notes:   Inspired the core visualization concept (continuous text block with
+           background colour runs). chunk-lens corrects the character-count
+           statistic, enables overlap on all strategies, adds gap rendering,
+           and improves accessibility.
+
+LangChain text splitters
+  URL:     https://python.langchain.com/docs/modules/data_connection/document_transformers/
+  Notes:   The separator ladders used in the recursive strategies are the
+           LangChain standard sets (plain-text, JavaScript, Python, Markdown).
+           They are the de-facto reference; identical ladders allow direct
+           comparison with LangChain outputs. See src/lib/splitters/separators.ts.
+
+Llama Index text splitters
+  URL:     https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/
+  Notes:   Referenced for understanding sentence-splitting behaviour and
+           markdown-header strategy semantics.
