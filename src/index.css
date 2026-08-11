@@ -86,3 +86,10 @@ pre,
 samp {
   font-family: var(--font-mono);
 }
+
+/* ── Responsive: stat tiles ── */
+@media (max-width: 600px) {
+  .stat-tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

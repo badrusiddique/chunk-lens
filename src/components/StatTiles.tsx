@@ -66,6 +66,7 @@ export function StatTiles({ stats }: Props) {
   return (
     <dl
       aria-label="Chunk statistics"
+      className="stat-tiles"
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',

@@ -44,7 +44,10 @@ export interface ChunkerState {
   splitterId: SplitterId;
   chunkSize: number;
   chunkOverlap: number;
+  /** Capped at RENDER_BUDGET for canvas rendering. */
   chunks: readonly Chunk[];
+  /** Full chunk array — use for stats so they reflect the real picture. */
+  allChunks: readonly Chunk[];
   isBudgetExceeded: boolean;
 }
 
@@ -73,15 +76,16 @@ export function useChunker(source: string): ChunkerState & ChunkerControls {
     }
   }, [splitterId, chunkSize, chunkOverlap]);
 
-  const { chunks, isBudgetExceeded } = useMemo(() => {
+  const { chunks, allChunks, isBudgetExceeded } = useMemo(() => {
     const meta = getSplitter(splitterId);
-    if (!meta || source.length === 0) return { chunks: [] as Chunk[], isBudgetExceeded: false };
+    if (!meta || source.length === 0)
+      return { chunks: [] as Chunk[], allChunks: [] as Chunk[], isBudgetExceeded: false };
     const opts: SplitterOptions = { chunkSize, chunkOverlap, measure: MEASURE_CHARS };
     const all = meta.split(source, opts);
     if (all.length > RENDER_BUDGET) {
-      return { chunks: all.slice(0, RENDER_BUDGET), isBudgetExceeded: true };
+      return { chunks: all.slice(0, RENDER_BUDGET), allChunks: all, isBudgetExceeded: true };
     }
-    return { chunks: all, isBudgetExceeded: false };
+    return { chunks: all, allChunks: all, isBudgetExceeded: false };
   }, [source, splitterId, chunkSize, chunkOverlap]);
 
   const setSplitterId = (id: SplitterId): void => {
@@ -105,6 +109,7 @@ export function useChunker(source: string): ChunkerState & ChunkerControls {
     chunkSize,
     chunkOverlap,
     chunks,
+    allChunks,
     isBudgetExceeded,
     setSplitterId,
     setChunkSize,

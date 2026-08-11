@@ -22,7 +22,7 @@ export function RenderBudgetNotice({ totalChunks }: Props) {
       }}
     >
       Showing first {RENDER_BUDGET.toLocaleString()} of {totalChunks.toLocaleString()}+ chunks.
-      Reduce chunk size or increase overlap to see all.
+      Increase chunk size or reduce overlap to fit within the render limit.
     </p>
   );
 }
