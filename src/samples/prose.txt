@@ -1,0 +1,11 @@
+Retrieval-augmented generation (RAG) is a technique that combines information retrieval with language model generation. Rather than relying entirely on knowledge encoded in model weights, a RAG system first searches a corpus of documents to find passages relevant to a query, then feeds those passages to the model as context.
+
+The quality of a RAG system depends critically on the quality of its retrieval step. If the retrieved passages do not contain the answer, even the most capable model cannot produce a correct response. Retrieval quality, in turn, depends on how the source documents are divided into chunks before they are embedded and stored.
+
+A chunk that is too small captures only a fragment of meaning and loses necessary context. A paragraph explaining why a piece of software behaves a certain way becomes useless if the chunk starts mid-sentence. A chunk that is too large dilutes the signal with unrelated content, making it harder for the embedding model to find the relevant vector.
+
+Good chunking preserves semantic units. For prose, that often means paragraphs. For code, it means function or class boundaries. For structured documents, it means sections defined by headers. The right strategy depends on the content type, the embedding model, and the downstream retrieval requirements.
+
+Overlap between adjacent chunks is a common mitigation for boundary effects. When a key piece of information falls near the edge of a chunk, overlap ensures it also appears in the neighbouring chunk. The cost is increased storage and retrieval noise; the benefit is higher recall on boundary-sensitive queries.
+
+Before you commit to a chunking strategy for a production system, visualise what it actually does to your documents. Different strategies produce dramatically different boundaries on the same input, and the difference matters downstream.

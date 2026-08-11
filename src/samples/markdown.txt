@@ -1,0 +1,48 @@
+# OpenSearch Index Design Guide
+
+A quick reference for designing OpenSearch indices for production workloads.
+
+## Choosing a Shard Count
+
+The number of primary shards determines the maximum parallelism for both indexing and search. Each shard is a Lucene index with a fixed overhead.
+
+**Rules of thumb:**
+
+- Target 20-50 GB per shard for search-heavy workloads
+- Target 50-100 GB per shard for log workloads where search is less critical
+- Never set more primary shards than you have data nodes
+
+```json
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  }
+}
+```
+
+## Mapping Types
+
+Use explicit mappings rather than relying on dynamic mapping in production.
+
+| Type | When to use |
+|------|-------------|
+| `keyword` | Exact-match filtering, aggregations, sorting |
+| `text` | Full-text search (triggers analysis pipeline) |
+| `date` | Time-range queries, date histogram aggregations |
+| `long` | Numeric range queries and bucketing |
+| `nested` | Arrays of objects where intra-object relationships matter |
+
+## Refresh and Flush Intervals
+
+The default refresh interval is 1 second. For bulk indexing jobs, set `refresh_interval` to `-1` to disable automatic refresh, then call `_refresh` manually after the load completes.
+
+## Common Mistakes
+
+1. **Mapping explosions** - allowing dynamic mapping on user-supplied keys can generate thousands of unique field names and degrade cluster state.
+2. **Over-sharding** - more shards than needed wastes resources and slows small queries that fan out unnecessarily.
+3. **Unbounded keyword cardinality** - indexing high-cardinality fields (UUIDs) in a fielddata context causes heap pressure.
+
+## Monitoring
+
+Track these metrics in production: indexing throughput, query latency (p50/p99), heap usage, and segment merge rates.
