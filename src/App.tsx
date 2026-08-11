@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { AppShell } from './components/AppShell';
 import { ChunkCanvas } from './components/ChunkCanvas';
 import { ChunkTable } from './components/ChunkTable';
@@ -5,8 +6,11 @@ import { Header } from './components/Header';
 import { ParamPanel } from './components/ParamPanel';
 import { RenderBudgetNotice } from './components/RenderBudgetNotice';
 import { SourcePane } from './components/SourcePane';
+import { StatTiles } from './components/StatTiles';
+import { WarningChips } from './components/WarningChips';
 import { useChunker } from './hooks/useChunker';
 import { useSourceText } from './hooks/useSourceText';
+import { computeStats } from './lib/stats';
 
 export function App() {
   const [source, setSource] = useSourceText();
@@ -20,6 +24,8 @@ export function App() {
     setChunkSize,
     setChunkOverlap,
   } = useChunker(source);
+
+  const stats = useMemo(() => computeStats(source, chunks), [source, chunks]);
 
   return (
     <AppShell
@@ -38,6 +44,8 @@ export function App() {
       }
       outputPane={
         <>
+          <StatTiles stats={stats} />
+          <WarningChips stats={stats} source={source} />
           {isBudgetExceeded && <RenderBudgetNotice totalChunks={chunks.length} />}
           <ChunkCanvas source={source} chunks={chunks} />
           <ChunkTable source={source} chunks={chunks} />
