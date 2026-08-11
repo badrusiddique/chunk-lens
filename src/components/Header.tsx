@@ -70,7 +70,7 @@ export function Header() {
             padding: '1px 5px',
           }}
         >
-          v0.1.0-dev
+          v0.1.0
         </span>
       </div>
 

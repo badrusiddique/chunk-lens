@@ -41,7 +41,11 @@ export function ChunkCanvas({ source, chunks }: Props) {
     setActiveFocusIdx(next);
     const runIdx = interactiveRunIndicesRef.current[next];
     if (runIdx !== undefined) {
-      spanRefs.current.get(runIdx)?.focus();
+      const el = spanRefs.current.get(runIdx);
+      if (el) {
+        el.focus({ preventScroll: true });
+        el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
     }
   }, []);
 

@@ -19,13 +19,14 @@ export function App() {
     chunkSize,
     chunkOverlap,
     chunks,
+    allChunks,
     isBudgetExceeded,
     setSplitterId,
     setChunkSize,
     setChunkOverlap,
   } = useChunker(source);
 
-  const stats = useMemo(() => computeStats(source, chunks), [source, chunks]);
+  const stats = useMemo(() => computeStats(source, allChunks), [source, allChunks]);
 
   return (
     <AppShell
@@ -46,7 +47,7 @@ export function App() {
         <>
           <StatTiles stats={stats} />
           <WarningChips stats={stats} source={source} />
-          {isBudgetExceeded && <RenderBudgetNotice totalChunks={chunks.length} />}
+          {isBudgetExceeded && <RenderBudgetNotice totalChunks={allChunks.length} />}
           <ChunkCanvas source={source} chunks={chunks} />
           <ChunkTable source={source} chunks={chunks} />
         </>
