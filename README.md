@@ -77,12 +77,12 @@ See [NOTICE](./NOTICE) for full prior-art attribution.
 
 ## Roadmap
 
-| Version            | Focus                                                     | Status      |
-| ------------------ | --------------------------------------------------------- | ----------- |
-| v0.1.0 Parity      | All ChunkViz features, correctly                          | In progress |
-| v0.2.0 Insight     | Token counts, distribution histogram, per-chunk inspector | Planned     |
-| v0.3.0 Portability | URL-shareable state, JSON/CSV/Markdown export             | Planned     |
-| v1.0.0 Comparison  | Side-by-side strategy comparison, documentation pages     | Planned     |
+| Version            | Focus                                                     | Status  |
+| ------------------ | --------------------------------------------------------- | ------- |
+| v0.1.0 Parity      | All ChunkViz features, correctly                          | Shipped |
+| v0.2.0 Insight     | Token counts, distribution histogram, per-chunk inspector | Planned |
+| v0.3.0 Portability | URL-shareable state, JSON/CSV/Markdown export             | Planned |
+| v1.0.0 Comparison  | Side-by-side strategy comparison, documentation pages     | Planned |
 
 ## License
 
