@@ -1,6 +1,9 @@
 import { AppShell } from './components/AppShell';
+import { ChunkCanvas } from './components/ChunkCanvas';
+import { ChunkTable } from './components/ChunkTable';
 import { Header } from './components/Header';
 import { ParamPanel } from './components/ParamPanel';
+import { RenderBudgetNotice } from './components/RenderBudgetNotice';
 import { SourcePane } from './components/SourcePane';
 import { useChunker } from './hooks/useChunker';
 import { useSourceText } from './hooks/useSourceText';
@@ -34,26 +37,11 @@ export function App() {
         />
       }
       outputPane={
-        <div
-          style={{
-            color: 'var(--text-muted)',
-            fontSize: '13px',
-            fontFamily: 'var(--font-mono)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'var(--space-2)',
-            height: '200px',
-          }}
-        >
-          {isBudgetExceeded && (
-            <span style={{ color: 'var(--status-warning-text)', fontSize: '12px' }}>
-              Showing first 2,000 of {chunks.length}+ chunks
-            </span>
-          )}
-          <span>Chunk canvas coming in feat/chunk-canvas</span>
-        </div>
+        <>
+          {isBudgetExceeded && <RenderBudgetNotice totalChunks={chunks.length} />}
+          <ChunkCanvas source={source} chunks={chunks} />
+          <ChunkTable source={source} chunks={chunks} />
+        </>
       }
     />
   );
