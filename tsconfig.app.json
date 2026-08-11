@@ -26,7 +26,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+
+    /* Test globals (vitest) */
+    "types": ["vitest/globals"]
   },
   "include": ["src"]
 }

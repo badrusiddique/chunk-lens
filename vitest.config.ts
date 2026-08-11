@@ -7,6 +7,9 @@ export default mergeConfig(
     test: {
       globals: true,
       environment: 'jsdom',
+      environmentOptions: {
+        jsdom: { url: 'http://localhost' },
+      },
       setupFiles: ['./src/test-setup.ts'],
       coverage: {
         provider: 'v8',

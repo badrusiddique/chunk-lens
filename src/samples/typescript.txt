@@ -1,0 +1,54 @@
+// A minimal typed event emitter
+
+type Listener<T> = (payload: T) => void;
+
+class TypedEmitter<Events extends Record<string, unknown>> {
+  private listeners = new Map<keyof Events, Set<Listener<unknown>>>();
+
+  on<K extends keyof Events>(event: K, listener: Listener<Events[K]>): () => void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    const set = this.listeners.get(event)!;
+    set.add(listener as Listener<unknown>);
+    return () => this.off(event, listener);
+  }
+
+  emit<K extends keyof Events>(event: K, payload: Events[K]): void {
+    this.listeners.get(event)?.forEach((fn) => fn(payload));
+  }
+
+  off<K extends keyof Events>(event: K, listener: Listener<Events[K]>): void {
+    this.listeners.get(event)?.delete(listener as Listener<unknown>);
+  }
+
+  once<K extends keyof Events>(event: K, listener: Listener<Events[K]>): () => void {
+    const remove = this.on(event, (payload) => {
+      listener(payload);
+      remove();
+    });
+    return remove;
+  }
+}
+
+// Usage
+
+type AppEvents = {
+  'user:login': { userId: string; timestamp: number };
+  'user:logout': { userId: string };
+  'data:loaded': { count: number; source: string };
+};
+
+const bus = new TypedEmitter<AppEvents>();
+
+const unsub = bus.on('user:login', ({ userId, timestamp }) => {
+  console.log(`${userId} logged in at ${new Date(timestamp).toISOString()}`);
+});
+
+bus.emit('user:login', { userId: 'alice', timestamp: Date.now() });
+bus.emit('data:loaded', { count: 42, source: 'api' });
+unsub();
+
+bus.once('user:logout', ({ userId }) => {
+  console.log(`${userId} logged out`);
+});
